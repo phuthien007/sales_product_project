@@ -1,17 +1,20 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <sstream>
+#include <fstream>
 #include <cstdlib>
 #include <iomanip>
 #include <fstream>
 using namespace std;
+int number_day_sales = 0;
 time_t t = time(0);
 tm *now = localtime(&t);
 string day, month;
 int year;
-int number_day_sales = 0;
 double price_A = 11.99, price_B = 12.99, price_C = 14.99, price_D = 15.99;
 fstream f_day, f_month, f_year;
+int total_qty_A = 0, total_qty_B = 0, total_qty_C = 0, total_qty_D = 0;
 void format_date()
 {
 	if (now->tm_mday < 10)
@@ -30,6 +33,7 @@ void format_date()
 		month = to_string(now->tm_mon);
 	year = now->tm_year % 100;
 }
+// task1
 void menu_task1(string name_sales)
 {
 	system("cls");
@@ -60,6 +64,36 @@ void save_report_the_day(int qty_A, int qty_B, int qty_C, int qty_D)
 
 	f_day << format_sale() << "\t" << setw(10) << left << qty_A << setw(10) << left << qty_B << setw(10) << left << qty_C << setw(10) << left << qty_D << endl;
 }
+void read_file(string filename, int &qty_A, int &qty_B, int &qty_C, int &qty_D, int &number_of_sales)
+{
+	ifstream fi(filename);
+	if (!fi.good())
+		return;
+	int tmp;
+	string s;
+	while (!fi.eof())
+	{
+		number_of_sales += 1;
+		getline(fi, s);
+		stringstream ss;
+
+		ss.str(s);
+		ss >> s;
+
+		ss >> tmp;
+		qty_A += tmp;
+
+		ss >> tmp;
+		qty_B += tmp;
+
+		ss >> tmp;
+		qty_C += tmp;
+
+		ss >> tmp;
+		qty_D += tmp;
+	}
+	fi.close();
+}
 // task1
 void task1(string name_sales)
 {
@@ -86,6 +120,10 @@ void task1(string name_sales)
 			tax = subtotal * 0.0825;
 			total = subtotal + tax;
 			balance = amount_paid - total;
+			total_qty_A += qty_A;
+			total_qty_B += qty_B;
+			total_qty_C += qty_C;
+			total_qty_D += qty_D;
 			// print receipt
 
 			cout << setfill('.');
@@ -153,13 +191,222 @@ void task1(string name_sales)
 	save_report_the_day(qty_A, qty_B, qty_C, qty_D);
 }
 
-void save_report_the_month(int total_qty_A, int total_qty_B, int total_qty_C, int total_qty_D)
+void save_report_the_month()
 {
-	f_month << setw(10) << left << day << setw(10) << left << total_qty_A << setw(10) << left << total_qty_B << setw(10) << left << total_qty_C << setw(10) << left << total_qty_D << endl;
+	int total_qty_A = 0, total_qty_B = 0, total_qty_C = 0, total_qty_D = 0;
+	int rac = 0;
+
+	for (int i = 1; i <= now->tm_mday; i++)
+	{
+		if (1 <= i && i <= 9)
+		{
+			string file_name = "daySale_0" + to_string(i) + month + to_string(year) + ".txt";
+			read_file(file_name, total_qty_A, total_qty_B, total_qty_C, total_qty_D, rac);
+		}
+		else
+		{
+			string file_name = "daySale_" + to_string(i) + month + to_string(year) + ".txt";
+
+			read_file(file_name, total_qty_A, total_qty_B, total_qty_C, total_qty_D, rac);
+		}
+	}
+
+	f_month << setw(10) << left << now->tm_mday << setw(10) << left << total_qty_A << setw(10) << left << total_qty_B << setw(10) << left << total_qty_C << setw(10) << left << total_qty_D << endl;
 }
-void save_report_the_year(int total_qty_A, int total_qty_B, int total_qty_C, int total_qty_D){
-	f_year << setw(10) << left << day << setw(10) << left << total_qty_A << setw(10) << left << total_qty_B << setw(10) << left << total_qty_C << setw(10) << left << total_qty_D << endl;
+void save_report_the_year()
+{
+	int total_year_A = 0, total_year_B = 0, total_year_C = 0, total_year_D = 0;
+	int rac = 0;
+
+	for (int i = 1; i <= now->tm_mon + 1; i++)
+	{
+		if (1 <= i && i <= 9)
+		{
+			string file_name = "monthSale_0" + to_string(i) + to_string(year) + ".txt";
+
+			read_file(file_name, total_year_A, total_year_B, total_year_C, total_year_D, rac);
+		}
+		else
+		{
+			string file_name = "monthSale_" + to_string(i) + to_string(year) + ".txt";
+			read_file(file_name, total_year_A, total_year_B, total_year_C, total_year_D, rac);
+		}
+	}
+
+	f_year << setw(10) << left << (now->tm_mon + 1) << setw(10) << left << total_year_A << setw(10) << left << total_year_B << setw(10) << left << total_year_C << setw(10) << left << total_year_D << endl;
 }
+// split datetime to create format
+void split_string(string s, string &t, string split_string)
+{
+	auto start = 0U;
+	auto end = s.find(split_string);
+	while (end != std::string::npos)
+	{
+		t.append(s.substr(start, end - start));
+		start = end + 1;
+		end = s.find(split_string, start);
+	}
+	t.append(s.substr(start, end));
+}
+
+//task2.1
+void read_report_day(string name_sales)
+{
+	system("cls");
+	int number_of_sales = 0;
+	int qty_A = 0, qty_B = 0, qty_C = 0, qty_D = 0;
+	string datetime;
+	string filename = "daySale_";
+	cout << "Enter date to view report(mm/dd/yy): ";
+	cin >> datetime;
+	cin.ignore();
+	// split datetime to create format filename
+	split_string(datetime, filename, "/");
+	filename.append(".txt");
+	read_file(filename, qty_A, qty_B, qty_C, qty_D, number_of_sales);
+	double subtotal = qty_A * price_A + qty_B * price_B + qty_C * price_C + qty_D * price_D;
+	double tax = subtotal * 0.0825;
+	double total = subtotal + tax;
+	// print receipt
+
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setw(25) << left << "RECEIPT - COMPANY CS" << endl;
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+
+	cout << setw(52) << left << "Date:" << datetime << endl;
+	cout << setw(40) << left << "Number of sale transactions:" << setw(20) << right << (number_of_sales==0? 0:number_of_sales-1) << endl;
+	cout << setw(20) << left << "Sale employee:" << setw(40) << right << name_sales << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout.precision(2);
+	cout.setf(ios::fixed, ios::floatfield);
+	cout << "Model CS21A (" << price_A << "/per unit)     " << setw(12) << right << qty_A << setw(15) << right << price_A * qty_A << endl;
+	cout << "Model CS21B (" << price_B << "/per unit)     " << setw(12) << right << qty_B << setw(15) << right << price_B * qty_B << endl;
+	cout << "Model CS21C (" << price_C << "/per unit)     " << setw(12) << right << qty_C << setw(15) << right << price_C * qty_C << endl;
+	cout << "Model CS21D (" << price_D << "/per unit)     " << setw(12) << right << qty_D << setw(15) << right << price_D * qty_D << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout << setw(40) << left << "Subtotal: " << setw(20) << right << subtotal << endl;
+	cout << setw(40) << left << "Tax(8.25%) " << setw(20) << right << tax << endl;
+	cout << setw(40) << left << "Total:" << setw(20) << right << total << endl;
+	//}
+	
+	system("pause");
+}
+// task2
+void print_ending_day_report(string name_sales)
+{
+	system("cls");
+	read_report_day(name_sales);
+}
+
+//task3.1
+void read_report_month(string name_sales)
+{
+	system("cls");
+	int number_of_sales = 0;
+	int qty_A = 0, qty_B = 0, qty_C = 0, qty_D = 0;
+	string datetime;
+	string filename = "monthSale_";
+	cout << "Enter date to view report(mm/yy): ";
+	cin >> datetime;
+	cin.ignore();
+	// split datetime to create format filename
+	split_string(datetime, filename, "/");
+	filename.append(".txt");
+	read_file(filename, qty_A, qty_B, qty_C, qty_D, number_of_sales);
+	double subtotal = qty_A * price_A + qty_B * price_B + qty_C * price_C + qty_D * price_D;
+	double tax = subtotal * 0.0825;
+	double total = subtotal + tax;
+	// print receipt
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setw(25) << left << "RECEIPT - COMPANY CS" << endl;
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout << setw(55) << left << "Month:" << datetime << endl;
+	cout << setw(20) << left << "Sale person:" << setw(40) << right << name_sales << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout.precision(2);
+	cout.setf(ios::fixed, ios::floatfield);
+	cout << "Model CS21A (" << price_A << "/per unit)     " << setw(12) << right << qty_A << setw(15) << right << price_A * qty_A << endl;
+	cout << "Model CS21B (" << price_B << "/per unit)     " << setw(12) << right << qty_B << setw(15) << right << price_B * qty_B << endl;
+	cout << "Model CS21C (" << price_C << "/per unit)     " << setw(12) << right << qty_C << setw(15) << right << price_C * qty_C << endl;
+	cout << "Model CS21D (" << price_D << "/per unit)     " << setw(12) << right << qty_D << setw(15) << right << price_D * qty_D << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout << setw(40) << left << "Subtotal: " << setw(20) << right << subtotal << endl;
+	cout << setw(40) << left << "Tax(8.25%) " << setw(20) << right << tax << endl;
+	cout << setw(40) << left << "Total:" << setw(20) << right << total << endl;
+	//}
+	system("pause");
+}
+// task3
+void print_ending_month_report(string name_sales)
+{
+	system("cls");
+	read_report_month(name_sales);
+}
+
+//task 4.1
+void read_report_year(string name_sales)
+{
+	system("cls");
+	int number_of_sales = 0;
+	int qty_A = 0, qty_B = 0, qty_C = 0, qty_D = 0;
+	string datetime;
+	string filename = "yearSale_";
+	cout << "Enter date to view report(yyyy): ";
+	cin >> datetime;
+	cin.ignore();
+	// split datetime to create format filename
+	//split_string(datetime, filename, "/");
+	filename.append(datetime);
+	filename.append(".txt");
+	read_file(filename, qty_A, qty_B, qty_C, qty_D, number_of_sales);
+	double subtotal = qty_A * price_A + qty_B * price_B + qty_C * price_C + qty_D * price_D;
+	double tax = subtotal * 0.0825;
+	double total = subtotal + tax;
+	// print receipt
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setw(25) << left << "RECEIPT - COMPANY CS" << endl;
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout << setw(56) << left << "Year:" << datetime << endl;
+	cout << setw(20) << left << "Sale person:" << setw(40) << right << name_sales << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout.precision(2);
+	cout.setf(ios::fixed, ios::floatfield);
+	cout << "Model CS21A (" << price_A << "/per unit)     " << setw(12) << right << qty_A << setw(15) << right << price_A * qty_A << endl;
+	cout << "Model CS21B (" << price_B << "/per unit)     " << setw(12) << right << qty_B << setw(15) << right << price_B * qty_B << endl;
+	cout << "Model CS21C (" << price_C << "/per unit)     " << setw(12) << right << qty_C << setw(15) << right << price_C * qty_C << endl;
+	cout << "Model CS21D (" << price_D << "/per unit)     " << setw(12) << right << qty_D << setw(15) << right << price_D * qty_D << endl;
+	cout << setfill('.');
+	cout << setw(60) << "." << endl;
+	cout << setfill(' ');
+	cout << setw(40) << left << "Subtotal: " << setw(20) << right << subtotal << endl;
+	cout << setw(40) << left << "Tax(8.25%) " << setw(20) << right << tax << endl;
+	cout << setw(40) << left << "Total:" << setw(20) << right << total << endl;
+	//}
+	system("pause");
+}
+// task4
+void print_ending_year_report(string name_sales)
+{
+	system("cls");
+	read_report_year(name_sales);
+}
+
 void menu()
 {
 	string name_sales;
@@ -167,10 +414,8 @@ void menu()
 	getline(cin, name_sales);
 	string file_name_day = "daySale_" + day + month + to_string(year) + ".txt";
 	f_day.open(file_name_day, ios::out | ios::app);
-	string file_name_month = "monthSale_"+month+to_string(year)+".txt";
-	f_month.open(file_name_month, ios::out | ios::app);
-	string file_name_year = "monthSale_"+month+to_string(year)+".txt";
-	f_year.open(file_name_year, ios::out | ios::app);
+
+	string file_name_month = "monthSale_" + month + to_string(year) + ".txt";
 
 	while (1)
 	{
@@ -203,16 +448,31 @@ void menu()
 		case 2:
 		{
 			// task 2
+			// task 2.1
+			f_month.open(file_name_month, ios::out | ios::trunc);
+			print_ending_day_report(name_sales);
+			// task 2.2
+			save_report_the_month();
+			f_month.close();
 			break;
 		}
 		case 3:
 		{
+
 			// task 3
+			// task 3.1
+			string file_name_year = "yearSale_" + to_string(now->tm_year + 1900) + ".txt";
+			f_year.open(file_name_year, ios::out);
+			print_ending_month_report(name_sales);
+			// task 3.2
+			save_report_the_year();
+			f_year.close();
 			break;
 		}
 		case 4:
 		{
 			// task 4
+			print_ending_year_report(name_sales);
 			break;
 		}
 		default:
@@ -220,11 +480,13 @@ void menu()
 			exit(0);
 		}
 	}
+	f_day.close();
 }
 int main()
 {
+
 	format_date();
 	menu();
-	//menuTask1("a");
+
 	return 0;
 }
