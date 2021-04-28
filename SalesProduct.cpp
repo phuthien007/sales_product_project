@@ -4,7 +4,8 @@
 #include <sstream>
 #include<fstream>
 #include <cstdlib>
-#include<iomanip>
+#include <iomanip>
+#include <fstream>
 using namespace std;
 int number_day_sales=0;
 time_t t = time(0);
@@ -245,7 +246,8 @@ void menu()
 	string name_sales;
 	cout << "Enter your name: ";
 	getline(cin, name_sales);
-	
+	string file_name_day = "daySale_" + day + month + to_string(year) + ".txt";
+	f.open(file_name_day, ios::out | ios::app);
 	while (1)
 	{
 		system("cls");
@@ -269,7 +271,9 @@ void menu()
 		case 1:
 		{
 			// task 1
+
 			task1(name_sales);
+
 			break;
 		}
 		case 2:
@@ -299,5 +303,6 @@ int main()
 {
 	format_date();
 	menu();
+	//menuTask1("a");
 	return 0;
 }
