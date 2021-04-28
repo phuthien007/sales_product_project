@@ -11,7 +11,7 @@ string day, month;
 int year;
 int number_day_sales = 0;
 double price_A = 11.99, price_B = 12.99, price_C = 14.99, price_D = 15.99;
-fstream f;
+fstream f_day, f_month, f_year;
 void format_date()
 {
 	if (now->tm_mday < 10)
@@ -58,7 +58,7 @@ string format_sale()
 void save_report_the_day(int qty_A, int qty_B, int qty_C, int qty_D)
 {
 
-	f << format_sale() << "\t" << setw(10) << left << qty_A << setw(10) << left << qty_B << setw(10) << left << qty_C << setw(10) << left << qty_D << endl;
+	f_day << format_sale() << "\t" << setw(10) << left << qty_A << setw(10) << left << qty_B << setw(10) << left << qty_C << setw(10) << left << qty_D << endl;
 }
 // task1
 void task1(string name_sales)
@@ -152,13 +152,26 @@ void task1(string name_sales)
 
 	save_report_the_day(qty_A, qty_B, qty_C, qty_D);
 }
+
+void save_report_the_month(int total_qty_A, int total_qty_B, int total_qty_C, int total_qty_D)
+{
+	f_month << setw(10) << left << day << setw(10) << left << total_qty_A << setw(10) << left << total_qty_B << setw(10) << left << total_qty_C << setw(10) << left << total_qty_D << endl;
+}
+void save_report_the_year(int total_qty_A, int total_qty_B, int total_qty_C, int total_qty_D){
+	f_year << setw(10) << left << day << setw(10) << left << total_qty_A << setw(10) << left << total_qty_B << setw(10) << left << total_qty_C << setw(10) << left << total_qty_D << endl;
+}
 void menu()
 {
 	string name_sales;
 	cout << "Enter your name: ";
 	getline(cin, name_sales);
 	string file_name_day = "daySale_" + day + month + to_string(year) + ".txt";
-	f.open(file_name_day, ios::out | ios::app);
+	f_day.open(file_name_day, ios::out | ios::app);
+	string file_name_month = "monthSale_"+month+to_string(year)+".txt";
+	f_month.open(file_name_month, ios::out | ios::app);
+	string file_name_year = "monthSale_"+month+to_string(year)+".txt";
+	f_year.open(file_name_year, ios::out | ios::app);
+
 	while (1)
 	{
 		system("cls");
