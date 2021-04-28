@@ -3,6 +3,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 time_t t = time(0);
 tm *now = localtime(&t);
@@ -10,6 +11,7 @@ string day, month;
 int year;
 int number_day_sales = 0;
 double price_A = 11.99, price_B = 12.99, price_C = 14.99, price_D = 15.99;
+fstream f;
 void format_date()
 {
 	if (now->tm_mday < 10)
@@ -53,16 +55,15 @@ string format_sale()
 	rs.append(s);
 	return rs;
 }
-void save_report_the_day(string file_name)
+void save_report_the_day(int qty_A, int qty_B, int qty_C, int qty_D)
 {
-	FILE *f;
-	f.open(file_name, )
+
+	f << format_sale() << "\t" << setw(10) << left << qty_A << setw(10) << left << qty_B << setw(10) << left << qty_C << setw(10) << left << qty_D << endl;
 }
 // task1
 void task1(string name_sales)
 {
 	double subtotal = 0, tax = 0, total = 0, balance = 0, amount_paid = 0;
-
 	int qty_A = 0, qty_B = 0, qty_C = 0, qty_D = 0;
 	number_day_sales++;
 	while (1)
@@ -89,8 +90,9 @@ void task1(string name_sales)
 
 			cout << setfill('.');
 			cout << setw(60) << "." << endl;
-
-			cout << setw(25) << left << "RECEIPT - COMPANY CS" << endl;
+			cout << setfill(' ');
+			cout << setw(40) << right << "RECEIPT - COMPANY CS" << endl;
+			cout << setfill('.');
 			cout << setw(60) << "." << endl;
 			cout << setfill(' ');
 			cout << setw(52) << left << "Date:" << day << "/" << month << "/" << year << endl;
@@ -147,13 +149,16 @@ void task1(string name_sales)
 			}
 		}
 	}
+
+	save_report_the_day(qty_A, qty_B, qty_C, qty_D);
 }
 void menu()
 {
 	string name_sales;
 	cout << "Enter your name: ";
 	getline(cin, name_sales);
-
+	string file_name_day = "daySale_" + day + month + to_string(year) + ".txt";
+	f.open(file_name_day, ios::out | ios::app);
 	while (1)
 	{
 		system("cls");
