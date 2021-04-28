@@ -1,3 +1,0 @@
-﻿  ConsoleApplication1.cpp
-C:\Users\Thien Phu\Desktop\ConsoleApplication1\ConsoleApplication1\ConsoleApplication1.cpp(16,27): error C2660: 'localtime_s': function does not take 1 arguments
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\time.h(555,47): message : see declaration of 'localtime_s'
